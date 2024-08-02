@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import Picker from 'emoji-picker-react';
+import EmojiPicker from 'emoji-picker-react';
+
+
+
 
 
 
@@ -30,10 +33,13 @@ const Chatbot = () => {
     setIsComposing(false);
   };
 
-  const addEmoji = (event, emojiObject) => {
-    setInput(input + emojiObject.emoji);
+  const addEmoji = (emojiData) => {
+    console.log("addEmoji function called");
+    console.log(emojiData); // 查看 emojiData 的內容
+    setInput(input + emojiData.emoji); // 使用 emojiData.emoji 添加表情符號
     setShowEmojiPicker(false);
   };
+  
 
 
   return (
@@ -71,7 +77,7 @@ const Chatbot = () => {
         </button>
         {showEmojiPicker && (
           <div className="absolute bottom-16 right-0">
-            <Picker onEmojiClick={addEmoji} />
+            <EmojiPicker onEmojiClick={addEmoji} />
           </div>  
         )}
         <button
