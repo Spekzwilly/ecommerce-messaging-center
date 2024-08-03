@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Message from './Message';
 import EmojiPickerMenu from './EmojiPickerMenu';
-import FileUpload from './FileUpload'; 
+import FileUpload from './FileUpload';
 import emojiData from './emojiData';
 
 const replaceEmojis = (text) => {
@@ -28,7 +28,7 @@ const Chatbot = () => {
   const [isComposing, setIsComposing] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
-
+  const textareaRef = useRef(null);
 
   const sendMessage = () => {
     if (input.trim() !== '') {
@@ -36,20 +36,22 @@ const Chatbot = () => {
       setMessages([...messages, { text: formattedMessage, sender: 'user', emojis: [] }]);
       setInput('');
       setShowEmojiPicker(false);
+      adjustTextareaHeight();
     }
   };
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !isComposing) {
+      event.preventDefault();
       sendMessage();
     }
   };
-  
+
   const handleGlobalKeyDown = (event) => {
     if (event.key === 'Enter' && !isComposing) {
-        sendMessage();
-      }
-  }
+      sendMessage();
+    }
+  };
 
   useEffect(() => {
     document.addEventListener('keydown', handleGlobalKeyDown);
@@ -68,13 +70,25 @@ const Chatbot = () => {
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
+    adjustTextareaHeight();
   };
 
-  const addEmoji = (emojiData) => {
-    setInput(input + emojiData.emoji); // 使用 emojiData.emoji 添加表情符號
-    setShowEmojiPicker(false);
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   };
-  
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, []);
+
+  const addEmoji = (emojiData) => {
+    setInput(input + emojiData.emoji);
+    setShowEmojiPicker(false);
+    adjustTextareaHeight();
+  };
+
   const handleClickOutside = (event) => {
     if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
       setShowEmojiPicker(false);
@@ -110,36 +124,37 @@ const Chatbot = () => {
           />
         ))}
       </div>
-      
+
       <div className="flex p-4 border-t border-gray-300 bg-gray-100 relative">
-        <div className="flex items-center w-full relative">
-          <input
-            type="text"
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={handleCompositionStart}
-            onCompositionEnd={handleCompositionEnd}
-            placeholder="Type a message..."
-            className="flex-1 p-2 bg-white text-black border border-gray-300 rounded-lg focus:outline-none pr-14"
+        <div className='flex items-end w-full relative'>
+          <div className="flex items-center w-full relative">
+            <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onCompositionStart={handleCompositionStart}
+                onCompositionEnd={handleCompositionEnd}
+                placeholder="Type a message..."
+                className="flex-1 p-2 bg-white text-black border border-gray-300 rounded-lg focus:outline-none resize-none max-h-40 min-h-6 overflow-auto"
+                style={{ height: '40px' }}
           />
-          <FileUpload 
-            onFileUpload={handleFileUpload} 
-          />
+            <FileUpload onFileUpload={handleFileUpload} />
+            <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
+            >
+                😀
+            </button>
+          </div>
           <button
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2"
-          >
-            😀
+            onClick={sendMessage}
+            className="ml-4 p-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center justify-center align-bottom"
+            style={{ height: '40px' }}
+            >
+            Send
           </button>
-          
         </div>
-        <button
-          onClick={sendMessage}
-          className="ml-4 p-2 bg-black text-white rounded-lg hover:bg-gray-800"
-        >
-          Send
-        </button>
         <div ref={emojiPickerRef}>
           <EmojiPickerMenu
             showEmojiPicker={showEmojiPicker}
@@ -147,7 +162,6 @@ const Chatbot = () => {
           />
         </div>
       </div>
-      
     </div>
   );
 };
