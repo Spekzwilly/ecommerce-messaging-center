@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Message from './Message';
 import EmojiPickerMenu from './EmojiPickerMenu';
+import FileUpload from './FileUpload'; 
 import emojiData from './emojiData';
 
 const replaceEmojis = (text) => {
@@ -91,6 +92,10 @@ const Chatbot = () => {
     };
   }, [showEmojiPicker]);
 
+  const handleFileUpload = (file) => {
+    setMessages([...messages, { text: `File uploaded: ${file.name}`, sender: 'user', fileUrl: file.url }]);
+  };
+
   return (
     <div className="flex flex-col w-full max-w-md h-screen bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="flex-1 p-6 overflow-y-auto text-black">
@@ -116,7 +121,10 @@ const Chatbot = () => {
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
             placeholder="Type a message..."
-            className="flex-1 p-2 bg-white text-black border border-gray-300 rounded-lg focus:outline-none pr-10"
+            className="flex-1 p-2 bg-white text-black border border-gray-300 rounded-lg focus:outline-none pr-14"
+          />
+          <FileUpload 
+            onFileUpload={handleFileUpload} 
           />
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -124,6 +132,7 @@ const Chatbot = () => {
           >
             😀
           </button>
+          
         </div>
         <button
           onClick={sendMessage}
